@@ -23,8 +23,8 @@ const setKeyValue = async (folder, key, value) => {
  * @description Returns a value from a redis key
  * @returns {Promise<Object>}
  */
-const getKeyValue = (key) => new Promise((resolve, reject) => {
-  redisClient.get(`${key}`, (err, value) => {
+const getKeyValue = (ipsFolder, key) => new Promise((resolve, reject) => {
+  redisClient.get(`${ipsFolder}:${key}`, (err, value) => {
     if (err) {
       console.debug('Redis get an error on get method', key, { scope: 'Redis' })
       return reject(err)

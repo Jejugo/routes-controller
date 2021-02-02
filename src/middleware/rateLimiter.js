@@ -7,6 +7,8 @@ const WINDOW_SIZE_IN_SECONDS = 60;
 const MAX_WINDOW_REQUEST_COUNT = 5;
 const WINDOW_LOG_INTERVAL_IN_SECONDS = 10;
 
+const ipsFolder = 'ips'
+
 const redisClient = redis.client
 
 const rateLimiterUsingNPM = limitter({
@@ -17,12 +19,12 @@ const rateLimiterUsingNPM = limitter({
 });
 
 
-const createRedisRecord = (ip, currentRequestTime) => {
+const createRedisRecord = async (ip, currentRequestTime) => {
   let newRecord = [{
     requestTimeStamp: currentRequestTime.unix(),
     requestCount: 1
   }];
-  redisClient.set(ip, JSON.stringify(newRecord))
+  await redisController.setKeyValue(ipsFolder, ip, JSON.stringify(newRecord))
 }
 
 const filterWindowEntries = (records, currentRequestTime) => {
@@ -34,7 +36,7 @@ const filterWindowEntries = (records, currentRequestTime) => {
 
 const countRequests = (records) => records.reduce((accumulator, entry) => accumulator + entry.requestCount, 0);
 
-const incrementOrCreateRecord = (records, ip, currentRequestTime) => {
+const incrementOrCreateRecord = async (records, ip, currentRequestTime) => {
   const lastRequestLog = records[records.length - 1]
   const logInterval = currentRequestTime.clone().subtract(WINDOW_LOG_INTERVAL_IN_SECONDS, 'seconds').unix()
 
@@ -51,24 +53,24 @@ const incrementOrCreateRecord = (records, ip, currentRequestTime) => {
     });
   }
 
-  redisClient.set(ip, JSON.stringify(records));
+  await redisController.setKeyValue(ipsFolder, ip, JSON.stringify(records));
 }
 
-const newEntry = (currentRequestTime, ip) => {
+const newEntry = async (currentRequestTime, ip) => {
   let newRecords = []
 
   newRecords.push({
     requestTimeStamp: currentRequestTime.unix(),
     requestCount: 1
   });
-  redisClient.set(ip, JSON.stringify(newRecords));
+  await redisController.setKeyValue(ipsFolder, ip, JSON.stringify(newRecords));
 }
 
 const customRedisRateLimitter = async (req, res, next) => {
   try {
     const ip = req.ip
 
-    const records = await redisController.getKeyValue(ip)
+    const records = await redisController.getKeyValue(ipsFolder, ip)
 
     const currentRequestTime = moment()
 
