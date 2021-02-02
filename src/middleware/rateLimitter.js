@@ -4,14 +4,12 @@ const redisController = require('../helper/redis')
 const moment = require('moment');
 
 const WINDOW_SIZE_IN_SECONDS = 60;
-const MAX_WINDOW_REQUEST_COUNT = 5;
+const MAX_WINDOW_REQUEST_COUNT = 15;
 const WINDOW_LOG_INTERVAL_IN_SECONDS = 10;
 
 const ipsFolder = 'ips'
 
-const redisClient = redis.client
-
-const rateLimiterUsingNPM = limitter({
+const rateLimitterUsingNPM = limitter({
   windowMs: 5000, // 24 hrs in milliseconds
   max: 5,
   message: 'You have exceeded the 5 requests in 5 seconds limit',
@@ -24,7 +22,7 @@ const createRedisRecord = async (ip, currentRequestTime) => {
     requestTimeStamp: currentRequestTime.unix(),
     requestCount: 1
   }];
-  await redisController.setKeyValue(ipsFolder, ip, JSON.stringify(newRecord))
+  redisController.setKeyValue(ipsFolder, ip, JSON.stringify(newRecord))
 }
 
 const filterWindowEntries = (records, currentRequestTime) => {
@@ -53,7 +51,7 @@ const incrementOrCreateRecord = async (records, ip, currentRequestTime) => {
     });
   }
 
-  await redisController.setKeyValue(ipsFolder, ip, JSON.stringify(records));
+  redisController.setKeyValue(ipsFolder, ip, JSON.stringify(records));
 }
 
 const newEntry = async (currentRequestTime, ip) => {
@@ -76,6 +74,7 @@ const customRedisRateLimitter = async (req, res, next) => {
 
     if (!records) {
       createRedisRecord(ip, currentRequestTime)
+      next()
     }
 
     else {
@@ -97,6 +96,7 @@ const customRedisRateLimitter = async (req, res, next) => {
           incrementOrCreateRecord(records, ip, currentRequestTime)
         }
       }
+      next()
     }
   }
 
@@ -106,6 +106,6 @@ const customRedisRateLimitter = async (req, res, next) => {
 }
 
 module.exports = {
-  rateLimiterUsingNPM,
+  rateLimitterUsingNPM,
   customRedisRateLimitter
 }

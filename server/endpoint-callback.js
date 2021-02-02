@@ -1,4 +1,4 @@
-const STATUS_OK = 200
+const RequestInformationQueue = require('../src/helper/queue')
 
 module.exports = (controller) => {
   return (req, res) => {
@@ -22,15 +22,19 @@ module.exports = (controller) => {
           res.set(httpResponse.headers)
         }
 
+        const options = {
+          delay: 5, // 1 min in ms
+          attempts: 2
+        };
+        
+        RequestInformationQueue.add({ status: 'success', httpRequest }, options)
         res.type('json')
-        if(res.status !== STATUS_OK){
-          //coloca no redis status erro
-        }
-        else{
-          //coloca no redis com status sucesso
-        }
         res.status(httpResponse.statusCode).send(httpResponse.body)
       })
-      .catch(err => res.status(500).send({ error: 'An unknown error has ocurred.', message: err.message }))
+      .catch(err => {
+        res.status(500).send({ error: 'An unknown error has ocurred.', message: err.message })
+        //send request to queue
+        Queue.add('RequestInformation', { req, status: 'error' })
+      })
   }
 }

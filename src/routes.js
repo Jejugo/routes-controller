@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const { rateLimiterUsingNPM, customRedisRateLimitter } = require('./middleware/rateLimiter')
+const { rateLimitterUsingNPM, customRedisRateLimitter } = require('./middleware/rateLimitter')
 const meliConfig = require('./helper/meli')
 
 const dotenv = require('dotenv')
@@ -21,7 +21,7 @@ const redirectCallBack = require('../server/endpoint-redirect')
 const app = express()
 app.use(bodyParser.json())
 
-app.use(customRedisRateLimitter)
+//app.use(customRedisRateLimitter)
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;

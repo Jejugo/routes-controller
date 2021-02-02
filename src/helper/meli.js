@@ -12,15 +12,18 @@ module.exports = async () => {
   let responseType = "code"; // String | 
   let clientId = process.env.CLIENT_ID; // String | 
   let redirectUri = process.env.REDIRECT_URI; // String | 
+  
+  console.log(`http://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`)
+  // const data = await fetch(`http://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`, { method:'GET' })
+  // console.log(data)
 
-  apiInstance.auth(responseType, clientId, redirectUri, (error, data, response) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log('API called successfully.');
-    }
-  });
-
-
-  //await request(url + params)
+  // apiInstance.auth(responseType, clientId, redirectUri, (error, data, response) => {
+  //   if (error) {
+  //     console.error(error);
+  //   } else {
+  //     console.log('API called successfully.');
+  //     //console.log(data)
+  //     console.log(response)
+  //   }
+  // });
 }
