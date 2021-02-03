@@ -16,6 +16,7 @@
     "test": "mocha 'test/**/*.js' --recursive --timeout 60000 --exit",
     "docker:run": "docker run -it -p 3002:3002  meli_proxy:latest",
     "docker:db:redis": "docker run --name redis_proxy -p 6379:6379 -d redis",
+    "docker:db:mongo": "docker run --name mongo_redis_proxy  -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret -d mongo",
     "docker:db:run-mysql": "docker run --rm --name=my-mysql --env MYSQL_ROOT_PASSWORD=password --detach --publish 3306:3306 mysql",
     "sequelize:generate:migration": "npx sequelize migration:generate --name [name_of_your_migration]"
   },
@@ -33,6 +34,7 @@
     "express": "^4.17.1",
     "mercadolibre-nodejs-sdk": "^3.0.1",
     "moment": "^2.29.1",
+    "mongoose": "^5.11.14",
     "mysql2": "^2.1.0",
     "node-fetch": "^2.6.1",
     "redis": "^3.0.2",

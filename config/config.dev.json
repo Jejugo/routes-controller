@@ -1,5 +1,6 @@
 {
   "nodeEnv": "development",
+  "host": "127.0.0.1",
   "sequelize": {
     "host": "127.0.0.1",
     "database": "ecommerce_db",

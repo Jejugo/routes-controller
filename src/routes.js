@@ -14,14 +14,13 @@ const {
 dotenv.config()
 meliConfig()
 
+
 const cors = require('../server/cors')
 const expressCallBack = require('../server/endpoint-callback')
 const redirectCallBack = require('../server/endpoint-redirect')
 
 const app = express()
 app.use(bodyParser.json())
-
-//app.use(customRedisRateLimitter)
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -33,11 +32,14 @@ app.use((req, res, next) => {
   next()
 });
 
+
+app.use(customRedisRateLimitter)
+
 app.use(cookieParser())
 
 const setUpRoutes = () => {
 
-  app.get('/health', expressCallBack(getHealth))
+  app.get('/health', (expressCallBack(getHealth)))
   app.get('/auth', expressCallBack(getAuth))
   app.get('/users/me', expressCallBack(getUser))
   return app

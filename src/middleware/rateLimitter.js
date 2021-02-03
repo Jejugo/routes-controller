@@ -2,6 +2,7 @@ const limitter = require('express-rate-limit')
 const redis = require('../../server/redis')
 const redisController = require('../helper/redis')
 const moment = require('moment');
+const RequestInformationQueue = require('../helper/queue')
 
 const WINDOW_SIZE_IN_SECONDS = 60;
 const MAX_WINDOW_REQUEST_COUNT = 15;
@@ -66,39 +67,58 @@ const newEntry = async (currentRequestTime, ip) => {
 
 const customRedisRateLimitter = async (req, res, next) => {
   try {
-    const ip = req.ip
+    // const ip = req.ip
 
-    const records = await redisController.getKeyValue(ipsFolder, ip)
+    // const records = await redisController.getKeyValue(ipsFolder, ip)
 
-    const currentRequestTime = moment()
+    // const currentRequestTime = moment()
 
-    if (!records) {
-      createRedisRecord(ip, currentRequestTime)
-      next()
-    }
+    // if (!records) {
+    //   createRedisRecord(ip, currentRequestTime)
+    //   next()
+    // }
 
-    else {
-      const entries = filterWindowEntries(records, currentRequestTime)
-      if (!entries.length) {
-        newEntry(currentRequestTime, ip)
-      }
+    // else {
+    //   const entries = filterWindowEntries(records, currentRequestTime)
+    //   if (!entries.length) {
+    //     newEntry(currentRequestTime, ip)
+    //   }
 
-      else {
-        const totalCountRequests = countRequests(records)
-        if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
-          res
-            .status(429)
-            .send(
-              `You have exceeded the ${MAX_WINDOW_REQUEST_COUNT} requests in ${WINDOW_SIZE_IN_SECONDS} secs limit!`
-            );
+    //   else {
+    //     const totalCountRequests = countRequests(records)
+    //     if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
+    //       res
+    //         .status(429)
+    //         .send(
+    //           `You have exceeded the ${MAX_WINDOW_REQUEST_COUNT} requests in ${WINDOW_SIZE_IN_SECONDS} secs limit!`
+    //         );
+    //     }
+    //     else{
+    //       incrementOrCreateRecord(records, ip, currentRequestTime)
+    //     }
+    //   }
+      const httpRequest = {
+        body: req.body,
+        query: req.query,
+        params: req.params,
+        ip: req.ip,
+        method: req.method,
+        path: req.path,
+        headers: {
+          'Content-Type': req.get('Content-Type'),
+          Referer: req.get('referer'),
+          'User-Agent': req.get('User-Agent'),
+          Authorization: req.get('Authorization')
         }
-        else{
-          incrementOrCreateRecord(records, ip, currentRequestTime)
-        }
       }
-      next()
+      RequestInformationQueue.add({ req: httpRequest })
+
+      RequestInformationQueue.on('global:completed', async (jobId, completed) => {
+        const job = await RequestInformationQueue.getJob(jobId)
+      })
+      //next()
     }
-  }
+  
 
   catch (err) {
     console.error(err)
