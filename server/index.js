@@ -5,7 +5,7 @@ const PORT = 3000
 
 const app = createServer()
 
-mongoose.connect(`mongodb://${config.host}:27017`, { useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(`mongodb://mongoadmin:secret@${config.host}:27017`, { useNewUrlParser: true, useUnifiedTopology: true})
   .then(() => {
     console.log('connected to db')
     app.listen(PORT || process.env.PORT, () => {

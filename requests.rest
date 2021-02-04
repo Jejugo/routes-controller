@@ -2,14 +2,12 @@ GET https://api.mercadolibre.com/users/me
 Authorization: Bearer DJiyzufGJ64XC50MSHr0z5j7QIhauxpC
 
 ###
-
-GET http://localhost:3000/users/me
-
-###
-
 GET http://localhost:3000/health
 
-  
+###
+
+GET http://localhost:3000/analytics
+
 ###
   
-GET http://localhost:3000/auth  
+GET http://localhost:3000/analytics?path=health&status=200  

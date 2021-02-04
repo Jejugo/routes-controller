@@ -2,7 +2,8 @@ const limitter = require('express-rate-limit')
 const redis = require('../../server/redis')
 const redisController = require('../helper/redis')
 const moment = require('moment');
-const RequestInformationQueue = require('../helper/queue')
+const RequestInformationQueue = require('../helper/queue');
+const fetchServerData = require('../api')
 
 const WINDOW_SIZE_IN_SECONDS = 60;
 const MAX_WINDOW_REQUEST_COUNT = 15;
@@ -39,13 +40,13 @@ const incrementOrCreateRecord = async (records, ip, currentRequestTime) => {
   const lastRequestLog = records[records.length - 1]
   const logInterval = currentRequestTime.clone().subtract(WINDOW_LOG_INTERVAL_IN_SECONDS, 'seconds').unix()
 
-  if(lastRequestLog.requestTimeStamp > logInterval){
+  if (lastRequestLog.requestTimeStamp > logInterval) {
     let lastRequestLog = records[records.length - 1]
     lastRequestLog.requestCount++;
     records[records.length - 1] = lastRequestLog;
   }
 
-  else{
+  else {
     records.push({
       requestTimeStamp: currentRequestTime.unix(),
       requestCount: 1
@@ -67,36 +68,36 @@ const newEntry = async (currentRequestTime, ip) => {
 
 const customRedisRateLimitter = async (req, res, next) => {
   try {
-    // const ip = req.ip
+    const ip = req.ip
 
-    // const records = await redisController.getKeyValue(ipsFolder, ip)
+    const records = await redisController.getKeyValue(ipsFolder, ip)
 
-    // const currentRequestTime = moment()
+    const currentRequestTime = moment()
 
-    // if (!records) {
-    //   createRedisRecord(ip, currentRequestTime)
-    //   next()
-    // }
+    if (!records) {
+      createRedisRecord(ip, currentRequestTime)
+      next()
+    }
 
-    // else {
-    //   const entries = filterWindowEntries(records, currentRequestTime)
-    //   if (!entries.length) {
-    //     newEntry(currentRequestTime, ip)
-    //   }
+    else {
+      const entries = filterWindowEntries(records, currentRequestTime)
+      if (!entries.length) {
+        newEntry(currentRequestTime, ip)
+      }
 
-    //   else {
-    //     const totalCountRequests = countRequests(records)
-    //     if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
-    //       res
-    //         .status(429)
-    //         .send(
-    //           `You have exceeded the ${MAX_WINDOW_REQUEST_COUNT} requests in ${WINDOW_SIZE_IN_SECONDS} secs limit!`
-    //         );
-    //     }
-    //     else{
-    //       incrementOrCreateRecord(records, ip, currentRequestTime)
-    //     }
-    //   }
+      else {
+        const totalCountRequests = countRequests(records)
+        if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
+          res
+            .status(429)
+            .send(
+              `You have exceeded the ${MAX_WINDOW_REQUEST_COUNT} requests in ${WINDOW_SIZE_IN_SECONDS} secs limit!`
+            );
+        }
+        else {
+          incrementOrCreateRecord(records, ip, currentRequestTime)
+        }
+      }
       const httpRequest = {
         body: req.body,
         query: req.query,
@@ -111,14 +112,21 @@ const customRedisRateLimitter = async (req, res, next) => {
           Authorization: req.get('Authorization')
         }
       }
-      RequestInformationQueue.add({ req: httpRequest })
+      const options = {
+        delay: 1000, // 1 min in ms
+        attempts: 1
+      };
+
+      RequestInformationQueue.add({ httpRequest }, options)
 
       RequestInformationQueue.on('global:completed', async (jobId, completed) => {
-        const job = await RequestInformationQueue.getJob(jobId)
+        console.log(completed)
+        const { data: { httpRequest } } = await RequestInformationQueue.getJob(jobId)
+        fetchServerData(httpRequest, req, res)
       })
-      //next()
     }
-  
+  }
+
 
   catch (err) {
     console.error(err)

@@ -14,9 +14,25 @@ const requestSchema = new Schema({
   status: {
     required: true,
     type: String
+  },
+  header: {
+    required: false,
+    type: Object
+  },
+  body: {
+    required: false,
+    type: Object
+  },
+  query: {
+    required: false,
+    type: Object
+  },
+  params: {
+    required: false,
+    type: Object
   }
 }, { timestamps: true })
 
-const Request = mongoose.model('Request', requestSchema)
+const Request = mongoose.model('request', requestSchema)
 
 module.exports = Request

@@ -1,10 +1,14 @@
-const RequestInformationQueue = require('../src/helper/queue')
-const moment = require('moment')
 
-module.exports = (controller) => {
-  const now = moment()
-  
-  return (req, res) => {
+const { mongoRequestTrack } = require('../src/builders')
+const { saveToMongo } = require('../src/helper/mongodb')
+
+const saveToMongoAnalytics = (request, response) => {
+  const requestObject = mongoRequestTrack(request, response)
+  saveToMongo(requestObject)
+}
+
+module.exports = (req, res, controller) => {
+  return () => {
     const httpRequest = {
       body: req.body,
       query: req.query,
@@ -25,19 +29,13 @@ module.exports = (controller) => {
           res.set(httpResponse.headers)
         }
 
-        const options = {
-          delay: 2000, // 1 min in ms
-          attempts: 2
-        };
-        
-        RequestInformationQueue.add({ status: 'success', httpRequest, timestamp: now.unix(), body: httpResponse.body }, options)
         res.type('json')
+        saveToMongoAnalytics(httpRequest, httpResponse)
         res.status(httpResponse.statusCode).send(httpResponse.body)
       })
       .catch(err => {
         res.status(500).send({ error: 'An unknown error has ocurred.', message: err.message })
         //send request to queue
-        RequestInformationQueue.add('RequestInformation', { status: 'error', httpRequest,  timestamp: now.unix() })
       })
   }
 }
