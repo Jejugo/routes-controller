@@ -18,7 +18,7 @@ const rateLimitterUsingNPM = limitter({
   headers: true,
 });
 
-const sendInformationToQueue = (req, res) => {
+const sendInformationToQueue = (req, next, app) => {
   const httpRequest = {
     body: req.body,
     query: req.query,
@@ -42,7 +42,8 @@ const sendInformationToQueue = (req, res) => {
 
   RequestInformationQueue.on('global:completed', async (jobId, completed) => {
     const { data: { httpRequest } } = await RequestInformationQueue.getJob(jobId)
-    fetchServerData(httpRequest, req, res)
+    fetchServerData(app)
+    next()
   })
 }
 
@@ -93,49 +94,46 @@ const newEntry = async (currentRequestTime, ip) => {
   await redisController.setKeyValue(ipsFolder, ip, JSON.stringify(newRecords));
 }
 
-const customRedisRateLimitter = async (req, res, next) => {
-  try {
-    const ip = req.ip
-
-    const records = await redisController.getKeyValue(ipsFolder, ip)
-
-    const currentRequestTime = moment()
-
-    if (!records) {
-      createRedisRecord(ip, currentRequestTime)
-      next()
-    }
-
-    else {
-      const entries = filterWindowEntries(records, currentRequestTime)
-      if (!entries.length) {
-        newEntry(currentRequestTime, ip)
+module.exports = (app) => {
+  return async function(req, res, next){
+    try {
+      const ip = req.ip
+  
+      const records = await redisController.getKeyValue(ipsFolder, ip)
+  
+      const currentRequestTime = moment()
+  
+      if (!records) {
+        createRedisRecord(ip, currentRequestTime)
+        next()
       }
-
+  
       else {
-        const totalCountRequests = countRequests(records)
-        if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
-          res
-            .status(429)
-            .send(
-              `You have exceeded the ${MAX_WINDOW_REQUEST_COUNT} requests in ${WINDOW_SIZE_IN_SECONDS} secs limit!`
-            );
+        const entries = filterWindowEntries(records, currentRequestTime)
+        if (!entries.length) {
+          newEntry(currentRequestTime, ip)
         }
+  
         else {
-          incrementOrCreateRecord(records, ip, currentRequestTime)
+          const totalCountRequests = countRequests(records)
+          if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
+            res
+              .status(429)
+              .send(
+                `You have exceeded the ${MAX_WINDOW_REQUEST_COUNT} requests in ${WINDOW_SIZE_IN_SECONDS} secs limit!`
+              );
+          }
+          else {
+            incrementOrCreateRecord(records, ip, currentRequestTime)
+          }
         }
+        sendInformationToQueue(req, next, app)
       }
-      sendInformationToQueue(req, res)
+    }
+  
+  
+    catch (err) {
+      console.error(err)
     }
   }
-
-
-  catch (err) {
-    console.error(err)
-  }
-}
-
-module.exports = {
-  rateLimitterUsingNPM,
-  customRedisRateLimitter
 }

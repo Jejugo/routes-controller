@@ -7,12 +7,12 @@ const saveToMongoAnalytics = (request, response) => {
   saveToMongo(requestObject)
 }
 
-module.exports = (req, res, controller, requestParams=[]) => {
-  return () => {
+module.exports = (controller) => {
+  return (req, res) => {
     const httpRequest = {
       body: req.body,
       query: req.query,
-      params: requestParams,
+      params: req.params,
       ip: req.ip,
       method: req.method,
       path: req.path,

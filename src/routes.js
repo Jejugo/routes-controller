@@ -1,7 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const { rateLimitterUsingNPM, customRedisRateLimitter } = require('./middleware/rateLimitter')
 const meliConfig = require('./helper/meli')
 
 const dotenv = require('dotenv')
@@ -9,10 +8,10 @@ const dotenv = require('dotenv')
 dotenv.config()
 meliConfig()
 
-
 const cors = require('../server/cors')
 
 const app = express()
+const customRedisRateLimitter = require('./middleware/rateLimitter')(app)
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;

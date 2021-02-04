@@ -1,7 +1,11 @@
 const makeGetUser = ({ errorMessages, retrieveUser }) => {
 	return async function getUser(httpRequest) {
 		try {
-			const user = await retrieveUser()
+			const {
+				cust_id
+			} = httpRequest.params
+
+			const user = await retrieveUser(cust_id)
 			
 			return {
 				statusCode: 200,
@@ -9,7 +13,6 @@ const makeGetUser = ({ errorMessages, retrieveUser }) => {
 			}
 		}
 		catch(err) {
-			console.log('errou!!', err)
 			const { status, body } = errorMessages[err.message] || { status: 400, body: err.message }
 			
 			return {

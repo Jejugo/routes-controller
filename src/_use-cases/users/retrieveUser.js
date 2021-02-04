@@ -1,9 +1,8 @@
-const makeRetrieveUser = ({ fetch, meli }) => {
-  return async function retrieveUser(){
+const mocks = require('../../mocks')
 
-   return {
-     message: 'This is a fake response.'
-   }
+const makeRetrieveUser = ({ cust_id }) => {
+  return async function retrieveUser(){
+    return mocks.getUser(cust_id)
   }
 }
 
