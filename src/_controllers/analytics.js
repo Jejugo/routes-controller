@@ -6,7 +6,6 @@ const makeGetAnalytics = ({ errorMessages, mongoController, RequestModel }) => {
         path,
         status
       } = httpRequest.query
-      console.log('1')
       const analyticsResult = await mongoController.retrieveFromMongo(RequestModel, path, status)
       return {
         statusCode: 200,

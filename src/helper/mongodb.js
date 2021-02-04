@@ -22,12 +22,10 @@ const saveToMongo = (Model) => Model.save().then(result => {
  */
 const retrieveFromMongo = (Model, path=null, status=null) => {
   let query = !path && !status ? {} : {
-    path: `/${path}`,
+    path: path ? `/${path}` : null,
     status
   }
- 
   query = filters.global.removeNullFromObject(query)
-  console.log('searching for: ', query)
   return Model.find(query)
 }
 

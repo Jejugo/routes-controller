@@ -1,0 +1,17 @@
+
+version: "3.0"
+
+services:
+  mongodb:
+    image: 'mongo'
+    container_name: 'mongo_proxy'
+    environment: 
+      - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    ports:
+      - 27017:27017
+  redis:
+    image: 'redis'
+    container_name: 'redis_proxy'
+    ports:
+      - 6379:6379

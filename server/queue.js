@@ -5,7 +5,7 @@ const bullFolder = 'bull'
 
 const saveDataToRedis = (job) => {
   const { httpRequest } = job.data
-  const ip = httpRequest.ip.split('::ffff:')[1]
+  const ip = httpRequest.ip.split('::ffff:')[1] 
 
   const redisObject = {
     ...httpRequest,
@@ -19,7 +19,6 @@ const saveDataToRedis = (job) => {
 
 
 RequestInformationQueue.process((job, done) => {
-  console.log('processando...')
   saveDataToRedis(job)
   done()
 })

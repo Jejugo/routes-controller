@@ -10,4 +10,8 @@ GET http://localhost:3000/analytics
 
 ###
   
-GET http://localhost:3000/analytics?path=health&status=200  
+GET http://localhost:3000/analytics?status=400
+
+###
+
+GET http://localhost:3000/users/teste

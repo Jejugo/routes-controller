@@ -18,6 +18,33 @@ const rateLimitterUsingNPM = limitter({
   headers: true,
 });
 
+const sendInformationToQueue = (req, res) => {
+  const httpRequest = {
+    body: req.body,
+    query: req.query,
+    params: req.params,
+    ip: req.ip,
+    method: req.method,
+    path: req.path,
+    headers: {
+      'Content-Type': req.get('Content-Type'),
+      Referer: req.get('referer'),
+      'User-Agent': req.get('User-Agent'),
+      Authorization: req.get('Authorization')
+    }
+  }
+  const options = {
+    delay: 1000, // 1 min in ms
+    attempts: 1
+  };
+
+  RequestInformationQueue.add({ httpRequest }, options)
+
+  RequestInformationQueue.on('global:completed', async (jobId, completed) => {
+    const { data: { httpRequest } } = await RequestInformationQueue.getJob(jobId)
+    fetchServerData(httpRequest, req, res)
+  })
+}
 
 const createRedisRecord = async (ip, currentRequestTime) => {
   let newRecord = [{
@@ -98,32 +125,7 @@ const customRedisRateLimitter = async (req, res, next) => {
           incrementOrCreateRecord(records, ip, currentRequestTime)
         }
       }
-      const httpRequest = {
-        body: req.body,
-        query: req.query,
-        params: req.params,
-        ip: req.ip,
-        method: req.method,
-        path: req.path,
-        headers: {
-          'Content-Type': req.get('Content-Type'),
-          Referer: req.get('referer'),
-          'User-Agent': req.get('User-Agent'),
-          Authorization: req.get('Authorization')
-        }
-      }
-      const options = {
-        delay: 1000, // 1 min in ms
-        attempts: 1
-      };
-
-      RequestInformationQueue.add({ httpRequest }, options)
-
-      RequestInformationQueue.on('global:completed', async (jobId, completed) => {
-        console.log(completed)
-        const { data: { httpRequest } } = await RequestInformationQueue.getJob(jobId)
-        fetchServerData(httpRequest, req, res)
-      })
+      sendInformationToQueue(req, res)
     }
   }
 

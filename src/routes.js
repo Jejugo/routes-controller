@@ -9,11 +9,10 @@ const dotenv = require('dotenv')
 dotenv.config()
 meliConfig()
 
+
 const cors = require('../server/cors')
 
-
 const app = express()
-app.use(bodyParser.json())
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -29,7 +28,6 @@ app.use((req, res, next) => {
 app.use(customRedisRateLimitter)
 
 app.use(cookieParser())
-
 
 module.exports = {
   createServer: () => app
