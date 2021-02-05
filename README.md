@@ -9,7 +9,7 @@
 - run `docker-compose up`
 - run `npm run dev`
 
-** Some routes to test are in the `requests.rest` file. To fire the request just hit `send request` right on top of the URI you are trying to access.**
+**Some routes to test are in the `requests.rest` file. To fire the request just hit `send request` right on top of the URI you are trying to access.**
 
 ### Project Design Architecture
 
