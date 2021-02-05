@@ -33,14 +33,13 @@ const sendInformationToQueue = async (req, next, app) => {
       Authorization: req.get('Authorization')
     }
   }
-  const options = {
-    delay: 1000, // 1 min in ms
-    attempts: 2
-  };
 
-  RequestInformationQueue.add({ httpRequest }, options)
 
-  RequestInformationQueue.on('global:completed', async (jobId, completed) => {
+  const job = RequestInformationQueue.createJob({ httpRequest })
+  job.timeout(1000)
+  job.save();
+
+  job.on('succeeded', async (result) => {
     fetchServerData(app)
     next()
   })

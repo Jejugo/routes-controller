@@ -12,8 +12,7 @@ module.exports = async () => {
   let responseType = "code"; // String | 
   let clientId = process.env.CLIENT_ID; // String | 
   let redirectUri = process.env.REDIRECT_URI; // String | 
-  
-  console.log(`http://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`)
+
   // const data = await fetch(`http://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`, { method:'GET' })
   // console.log(data)
 

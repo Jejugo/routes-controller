@@ -1,7 +1,7 @@
 const RequestInformationQueue = require('../src/helper/queue')
 const redisController = require('../src/helper/redis')
 
-const bullFolder = 'bull'
+const beeFolder = 'bee-queue'
 
 const saveDataToRedis = async (job, done) => {
   try{
@@ -14,8 +14,8 @@ const saveDataToRedis = async (job, done) => {
       timestamp: job.data.timestamp,
       ip
     }
-  
-    await redisController.setKeyValue(bullFolder, httpRequest.path, JSON.stringify(redisObject))
+    
+    await redisController.setKeyValue(beeFolder, httpRequest.path, JSON.stringify(redisObject))
     done()
   }
   catch(err){

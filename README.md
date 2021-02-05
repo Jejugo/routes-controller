@@ -9,6 +9,8 @@
 - run `docker-compose up`
 - run `npm run dev`
 
+** Some routes to test are in the `requests.rest` file. To fire the request just hit `send request` right on top of the URI you are trying to access.**
+
 ### Project Design Architecture
 
 ```
@@ -99,7 +101,7 @@ This mongo data can have a lifecycle of 3 months and every 5 hours the data from
 
 ## Further steps...
 
-### Kubernets
+### **Kubernets**
 To scalate even more, we could think about configuring Kubernetes to increase the capacity of the server, being able to take in much more requests and also improving response time by having many others instances of the server up and running.
-### Load balancer
+### **Load balancer**
 Along with Kubernetes a load balancer (nginx for example) could be configured to manage the requests and limit request overload and distributing it across different server instances
