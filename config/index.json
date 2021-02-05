@@ -1,13 +1,6 @@
 {
   "nodeEnv": "development",
   "host": "127.0.0.1",
-  "sequelize": {
-    "host": "127.0.0.1",
-    "database": "ecommerce_db",
-    "username": "root",
-    "password": "password",
-    "dialect": "mysql"
-  },
   "redis":{
     "connection": {
       "host": "127.0.0.1",
@@ -17,6 +10,9 @@
       "scanCount": 500
     },
     "redisFolderIps": "ips"
+  },
+  "mongo":{
+    "host": "127.0.0.1"
   },
   "meli": {
     "api": "api.mercadolibre.com"

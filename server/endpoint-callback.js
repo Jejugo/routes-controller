@@ -28,14 +28,10 @@ module.exports = (controller) => {
         if(httpResponse.headers){
           res.set(httpResponse.headers)
         }
-
+        
         res.type('json')
         saveToMongoAnalytics(httpRequest, httpResponse)
         res.status(httpResponse.statusCode).send(httpResponse.body)
-      })
-      .catch(err => {
-        res.status(500).send({ error: 'An unknown error has ocurred.', message: err.message })
-        //send request to queue
       })
   }
 }

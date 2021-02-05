@@ -1,6 +1,11 @@
 
 version: "3.0"
 
+networks:
+  backend:
+  local:
+    driver: bridge
+
 services:
   mongodb:
     image: 'mongo'
@@ -10,8 +15,12 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=secret
     ports:
       - 27017:27017
+    networks:
+      - backend
   redis:
-    image: 'redis'
+    image: 'redis:latest'
     container_name: 'redis_proxy'
     ports:
       - 6379:6379
+    networks:
+      - backend

@@ -12,7 +12,7 @@ const redisClient = redis.client
  * @param {Number} token - expiration
  */
 const setKeyValue = async (folder, key, value) => {
-  console.info(`Setting values for ${key}: ${value}`, { scope: 'Redis' })
+  //console.info(`Setting values for ${key}: ${value}`, { scope: 'Redis' })
   await redisClient.set(`${folder}:${key}`, value)
   //await redisClient.expire(`${folder}:${key}`, expiration)
 }
@@ -26,10 +26,10 @@ const setKeyValue = async (folder, key, value) => {
 const getKeyValue = (folder, key) => new Promise((resolve, reject) => {
   redisClient.get(`${folder}:${key}`, (err, value) => {
     if (err) {
-      console.debug('Redis get an error on get method', key, { scope: 'Redis' })
+     // console.debug('Redis get an error on get method', key, { scope: 'Redis' })
       return reject(err)
     }
-    console.info(`Fetching values for ${key}`, { scope: 'Redis' })
+    //console.info(`Fetching values for ${key}`, { scope: 'Redis' })
     resolve(JSON.parse(value) || '')
   })
 })

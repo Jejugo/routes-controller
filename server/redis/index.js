@@ -1,5 +1,6 @@
 const bluebird = require('bluebird')
 
+
 let client
 
 const createClient = () => {
@@ -12,6 +13,7 @@ const createClient = () => {
   bluebird.promisifyAll(redis.Multi.prototype)
 
   client = redis.createClient(configs)
+
 
   return client
 }

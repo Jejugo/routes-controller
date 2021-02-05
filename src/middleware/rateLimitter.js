@@ -11,14 +11,14 @@ const WINDOW_LOG_INTERVAL_IN_SECONDS = 10;
 
 const ipsFolder = 'ips'
 
-const rateLimitterUsingNPM = limitter({
-  windowMs: 5000, // 24 hrs in milliseconds
-  max: 5,
-  message: 'You have exceeded the 5 requests in 5 seconds limit',
-  headers: true,
-});
+// const rateLimitterUsingNPM = limitter({
+//   windowMs: 5000, // 24 hrs in milliseconds
+//   max: 5,
+//   message: 'You have exceeded the 5 requests in 5 seconds limit',
+//   headers: true,
+// });
 
-const sendInformationToQueue = (req, next, app) => {
+const sendInformationToQueue = async (req, next, app) => {
   const httpRequest = {
     body: req.body,
     query: req.query,
@@ -35,13 +35,12 @@ const sendInformationToQueue = (req, next, app) => {
   }
   const options = {
     delay: 1000, // 1 min in ms
-    attempts: 1
+    attempts: 2
   };
 
   RequestInformationQueue.add({ httpRequest }, options)
 
   RequestInformationQueue.on('global:completed', async (jobId, completed) => {
-    const { data: { httpRequest } } = await RequestInformationQueue.getJob(jobId)
     fetchServerData(app)
     next()
   })
@@ -95,25 +94,25 @@ const newEntry = async (currentRequestTime, ip) => {
 }
 
 module.exports = (app) => {
-  return async function(req, res, next){
+  return async function (req, res, next) {
     try {
       const ip = req.ip
-  
+
       const records = await redisController.getKeyValue(ipsFolder, ip)
-  
+
       const currentRequestTime = moment()
-  
+
       if (!records) {
         createRedisRecord(ip, currentRequestTime)
-        next()
+        sendInformationToQueue(req, next, app)
       }
-  
+
       else {
         const entries = filterWindowEntries(records, currentRequestTime)
         if (!entries.length) {
           newEntry(currentRequestTime, ip)
         }
-  
+
         else {
           const totalCountRequests = countRequests(records)
           if (totalCountRequests >= MAX_WINDOW_REQUEST_COUNT) {
@@ -130,8 +129,8 @@ module.exports = (app) => {
         sendInformationToQueue(req, next, app)
       }
     }
-  
-  
+
+
     catch (err) {
       console.error(err)
     }

@@ -5,11 +5,11 @@ const PORT = 3000
 
 const app = createServer()
 
-mongoose.connect(`mongodb://mongoadmin:secret@${config.host}:27017`, { useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(`mongodb://mongoadmin:secret@${config.mongo.host}:27017`, { useNewUrlParser: true, useUnifiedTopology: true})
   .then(() => {
-    console.log('connected to db')
+    console.info('connected to db')
     app.listen(PORT || process.env.PORT, () => {
-      console.log(`Server is listening on port ${PORT}.`)
+      console.info(`Server is listening on port ${PORT}.`)
     })
   })
   .catch(err => console.error('There was an error connecting to the db: ', err))
